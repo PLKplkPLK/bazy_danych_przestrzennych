@@ -67,14 +67,11 @@ select st_area(st_difference(geom1, geom2)) as "Pole powierzchni" from buildingB
 
 -- g
 /*
-with crossSec as (
-select buildings.name as name, buildings.geometry as geomB, roads.geometry as geomR
-	from buildings, roads
+with roadX as (
+select geometry as geomX from roads where name='RoadX'
 )
-select name from crossSec where st_y(st_centroid(geomB)) > st_y(geomR)*/
--- inaczej:
---select name from buildings where st_y(st_centroid(geometry)) > 4.5;
-
+select name from buildings, roadX where st_y(st_centroid(geometry)) > st_y(st_centroid(geomX));
+*/
 -- h
 -- select st_area(st_difference(geometry, 'POLYGON((4 7, 6 7, 6 8, 4 8, 4 7))')) as "Pole powierzchni różnicy"
 -- from buildings where name='BuildingC'
