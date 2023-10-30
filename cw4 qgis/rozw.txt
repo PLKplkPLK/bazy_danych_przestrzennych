@@ -1,0 +1,6 @@
+zad 0. wczytanie danych np.
+shp2pgsql D:\BDPrzestrzennych\dane\qgis_sample_data\shapefiles\swamp.shp public.swamps | psql -h localhost -p 5432 -U postgres -d cw4
+
+
+zad 4. Usunięcie lotnisk o charakterze militarnym, położonych powyżej 1400 mnpm.
+W tabeli atrybutów znalazłem takie lotnisko i w trybie edycji kliknąłem "delete".
