@@ -1,6 +1,23 @@
-zad 0. wczytanie danych np.
+Zad 0. wczytanie danych np.
 shp2pgsql D:\BDPrzestrzennych\dane\qgis_sample_data\shapefiles\swamp.shp public.swamps | psql -h localhost -p 5432 -U postgres -d cw4
 
+Zad 1. Wyniki i ustawienia na obrazkach
 
-zad 4. Usunięcie lotnisk o charakterze militarnym, położonych powyżej 1400 mnpm.
-W tabeli atrybutów znalazłem takie lotnisko i w trybie edycji kliknąłem "delete".
+Zad 2. Też na obrazkach. Przy podziale należało ustawić opcję, aby algorytm ignorował nieprawidłowe wartości, inaczej nie przechodził (może było to spowodowane nie ustawieniem srid).
+
+Zad 3. Warstwy (regions, railroads) najpierw zostały zmienione na EPSG:2964. Po zaznaczeniu Matanuski, eksport, przycięcie railroads do nowej warstwy i w kalkulatorze pól sum($length). Ostateczny wynik: 268205 (stóp?).
+
+Zad 4. Usunięcie lotnisk o charakterze militarnym, położonych powyżej 1400 mnpm:
+w tabeli atrybutów znalazłem takie lotnisko i w trybie edycji kliknąłem "delete".
+
+Zad 5. Tak jak w zadaniu 3, wybrany został Bristol Bay i wyciągnięty do warstwy "budynki_bristol_bay", potem intersection z "popp" i Group Stats do policzenia ilości (ilość można sprawdzić też w tabeli atrybutów, albo i oczami policzyć w tym wypadku). Utworzona warstwa "Przecięcie (intersection)" to szukana w zadaniu warstwa.
+
+Zad 6. Zadanie wcześniejsze potwórzone zostało, ale z ustawionym EPSG Alaski. Wynik buforu wyszedł gargantuiczny. Potem zwykłe intersection tych budynków z buforem (nic się nie zmieni, przez tak wielki bufor). Zostało więc 11 budynków, tyle ile wcześniej.
+
+Zad 7. Zadanie robione bez zmiany epsg. Ilość przecięć: 8.
+
+Zad 8. Najpierw narzędzie "Wydobądź wierzchołki". Żeby przenieść warstwę do tabeli (tak jak robiłem to w przypadku drzew, linii kolejowych dla Matanuski i budynków w Bristol Bay): zarządzanie bazami danych i importuj warstwę/plik.
+
+Zad 9. 2 bufory, jak wcześniej dla linii kolejowych i lotnisk. Później "Przytnij" oba bufory.
+
+Zad 10. Zastosowanie narzędzia "Uprość geometrię" i porównanie warstw (znajduje się na obrazkach).
