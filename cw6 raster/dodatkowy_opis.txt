@@ -1,0 +1,23 @@
+W ST_Intersects są dodatkowe argumenty - do wybierania kanału z rastra.
+
+Indeks przestrzenny - specjalny indeks używany w bazach danych przestrzennych, przyspiesza zapytania szczególnie dotyczące danych przestrzennych.
+
+Raster Constraints - używane, do tego, żeby te same rastry "współgrały" ze sobą w bazie.
+
+St_clip - przycina raster, na podstawie geometrii wektorowej (analogiczne do st_intersection). St_union łączy rastry (np. wynikowe z st_clip) w jeden duży raster lub też pozwala agregować wiele rastrów.
+
+St_asraster tworzy rastry na podstawie poligonów, w tym przypadku zadziałał chyba jak st_clip.
+
+St_tile działa w drugą stronę w przeciwieństwie do st_union. Może dzielić rastry na kafelki z rozmiarami width x height.
+
+(st_intersection(geom, rast)).geom i .val - zwraca krotkę (geom, val). St_intersection zamienia raster na malutkie geometrki, każda z wartością "val" przypisaną do niej.
+st_dumpaspolygons działa tak samo.
+
+
+Analiza rastrów:
+- raster st_band(rast, i) - do wyciągnięcia pasma
+- raster st_slope(rast) - zwraca raster z nachyleniem
+- raster st_reclass(rast,...) - np. reclass band 2: convert from 8BUI to 4BUI and set all values from 101-254 to nodata value
+- st_summarystats(rast) - statystyki (count, suma, średnia, min, max). Można użyć st_summarystats(st_union(rast)), dla całego rastra. Można: (st_summarystats(rast)).mean
+- double st_value(rast, point) - wyciąga wartość, ale potrzebuje geometrię jednopunktową (czyli punkt, a nie poligon)
+- raster st_tpi(rast) - zwraca raster TPI. Na przyciętym rastrze wykonywało się 0.6s, a więc dużo szybciej (unbelievable).
