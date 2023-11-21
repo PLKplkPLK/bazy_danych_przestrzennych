@@ -20,4 +20,14 @@ Analiza rastrów:
 - raster st_reclass(rast,...) - np. reclass band 2: convert from 8BUI to 4BUI and set all values from 101-254 to nodata value
 - st_summarystats(rast) - statystyki (count, suma, średnia, min, max). Można użyć st_summarystats(st_union(rast)), dla całego rastra. Można: (st_summarystats(rast)).mean
 - double st_value(rast, point) - wyciąga wartość, ale potrzebuje geometrię jednopunktową (czyli punkt, a nie poligon)
-- raster st_tpi(rast) - zwraca raster TPI. Na przyciętym rastrze wykonywało się 0.6s, a więc dużo szybciej (unbelievable).
+- raster st_tpi(rast) - zwraca raster TPI. Na przyciętym rastrze wykonywało się dużo szybciej (unbelievable)
+
+
+Algebra map
+raster ST_MapAlgebra(raster rast1, integer nband1, raster rast2, integer nband2, text expression...) - stworzenie nowego rastra, z wartościami z innych rastrów i różnych ich kanałów. expression np. '([rast2.val] - [rast1.val])::float'.
+
+Definicje public._st_tpi4ma i public.st_tpi wyglądają skomplikowanie :), jak wszystkie profesjonalnie tworzone funkcje w programowaniu.
+
+
+
+Eksport - za pomocą QGIS lub funkcji ST_AsTiff, ST_AsGDALRaster. Przy czym w tej drugiej można podać w jakim formacie zapisać. Można też skorzystać z Gdal, za pomocą gdal_translate.

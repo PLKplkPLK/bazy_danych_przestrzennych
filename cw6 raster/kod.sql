@@ -5,6 +5,9 @@ create extension postgis_raster;
 select * from rasters.dem;
 select * from rasters.landsat8;
 
+
+-- Tworzenie rastrów z istniejących rastrów i interakcja z wektorami
+
 CREATE TABLE muller.intersects AS
 SELECT a.rast, b.municipality
 FROM rasters.dem AS a, vectors.porto_parishes AS b
@@ -29,6 +32,9 @@ CREATE TABLE muller.union AS
 SELECT ST_Union(ST_Clip(a.rast, b.geom, true))
 FROM rasters.dem AS a, vectors.porto_parishes AS b
 WHERE b.municipality ilike 'porto' and ST_Intersects(b.geom,a.rast);
+
+
+-- Tworzenie rastrów z wektorów (rastrowanie)
 
 CREATE TABLE muller.porto_parishes AS
 WITH r AS (
@@ -65,6 +71,8 @@ WHERE a.municipality ilike 'porto';
 select * from muller.porto_parishes
 
 
+-- Konwertowanie rastrów na wektory (wektoryzowanie)
+
 create table muller.intersection as
 SELECT a.rid,(ST_Intersection(b.geom,a.rast)).geom,(ST_Intersection(b.geom,a.rast)).val
 FROM rasters.landsat8 AS a, vectors.porto_parishes AS b
@@ -78,6 +86,9 @@ FROM rasters.landsat8 AS a, vectors.porto_parishes AS b
 WHERE b.parish ilike 'paranhos' and ST_Intersects(b.geom,a.rast);
 
 select * from muller.dumppolygons
+
+
+-- Analiza rastrów
 
 CREATE TABLE muller.landsat_nir AS
 SELECT rid, ST_Band(rast,4) AS rast
@@ -128,6 +139,9 @@ WHERE ST_Intersects(a.rast,b.geom)
 ORDER BY b.name;
 
 
+
+-- Topographic Position Index (TPI)
+
 create table muller.tpi30 as
 select ST_TPI(a.rast,1) as rast
 from rasters.dem a;
@@ -136,7 +150,9 @@ CREATE INDEX idx_tpi30_rast_gist ON muller.tpi30
 USING gist (ST_ConvexHull(rast));
 
 SELECT AddRasterConstraints('muller'::name, 'tpi30'::name,'rast'::name);
-*/
+
+
+-- Zadanie
 drop table if exists muller.porto_tpi;
 create table muller.porto_tpi as
 with porto as (
@@ -147,3 +163,79 @@ with porto as (
 select st_tpi(st_union(rast)) from porto;
 
 select * from muller.porto_tpi
+
+
+-- Algebra Map
+CREATE TABLE muller.porto_ndvi AS
+WITH r AS (
+	SELECT a.rid,ST_Clip(a.rast, b.geom,true) AS rast
+	FROM rasters.landsat8 AS a, vectors.porto_parishes AS b
+	WHERE b.municipality ilike 'porto' and ST_Intersects(b.geom,a.rast)
+)
+SELECT r.rid,ST_MapAlgebra(r.rast, 1, r.rast, 4, '([rast2.val] - [rast1.val]) / ([rast2.val] + [rast1.val])::float','32BF') AS rast
+FROM r;
+
+CREATE INDEX idx_porto_ndvi_rast_gist ON muller.porto_ndvi
+USING gist (ST_ConvexHull(rast));
+
+SELECT AddRasterConstraints('muller'::name, 'porto_ndvi'::name,'rast'::name);
+
+
+
+create or replace function muller.ndvi(
+	value double precision [] [] [],
+	pos integer [][],
+	VARIADIC userargs text []
+)
+RETURNS double precision AS
+$$
+BEGIN
+--RAISE NOTICE 'Pixel Value: %', value [1][1][1];-->For debug purposes
+RETURN (value [2][1][1] - value [1][1][1])/(value [2][1][1]+value [1][1][1]); --> NDVI calculation!
+END;
+$$
+LANGUAGE 'plpgsql' IMMUTABLE COST 1000;
+
+
+CREATE TABLE muller.porto_ndvi2 AS
+WITH r AS (
+	SELECT a.rid, ST_Clip(a.rast, b.geom,true) AS rast
+	FROM rasters.landsat8 AS a, vectors.porto_parishes AS b
+	WHERE b.municipality ilike 'porto' and ST_Intersects(b.geom,a.rast)
+)
+SELECT
+	r.rid,ST_MapAlgebra(
+	r.rast, ARRAY[1,4],
+	'muller.ndvi(double precision[], integer[],text[])'::regprocedure, --> This is the function!
+	'32BF'::text
+) AS rast
+FROM r;
+
+CREATE INDEX idx_porto_ndvi2_rast_gist ON muller.porto_ndvi2
+USING gist (ST_ConvexHull(rast));
+
+SELECT AddRasterConstraints('muller'::name, 'porto_ndvi2'::name,'rast'::name);
+
+
+-- Eksport danych
+SELECT ST_AsTiff(ST_Union(rast))
+FROM muller.porto_ndvi; -- no i to odczytać z bazy
+
+SELECT ST_GDALDrivers();
+SELECT ST_AsGDALRaster(ST_Union(rast), 'JPEG',
+					   ARRAY['COMPRESS=DEFLATE', 'PREDICTOR=2', 'PZLEVEL=9'])
+FROM muller.porto_ndvi;
+
+CREATE TABLE tmp_out AS
+SELECT lo_from_bytea(0,
+	ST_AsGDALRaster(ST_Union(rast), 'GTiff', ARRAY['COMPRESS=DEFLATE', 'PREDICTOR=2', 'PZLEVEL=9'])
+) AS loid
+FROM muller.porto_ndvi;
+----------------------------------------------
+SELECT lo_export(loid, 'D:\OneDrive\studia\BDPrzestrzennych\bazy_danych_przestrzennych\cw6 raster\11_sql_export.tiff')
+FROM tmp_out;
+----------------------------------------------
+SELECT lo_unlink(loid)
+FROM tmp_out; --> Delete the large object.
+drop table tmp_out;
+*/
