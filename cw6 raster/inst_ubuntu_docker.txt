@@ -1,0 +1,41 @@
+# nie wiem czy to jest potrzebne, u mnie było
+sudo dpkg --configure -a
+
+sudo apt update
+sudo apt upgrade
+sudo apt install postgresql
+sudo -u postgres psql template1
+ALTER USER postgres with encrypted password 'your_password';
+#check:
+psql --host localhost --username postgres --password --dbname template1
+#żeby wyjść z psql:
+exit
+
+#żeby wejść do postgresql'a:
+sudo -u postgres psql
+#w postgresie:
+create database cw6;
+/c cw6
+exit
+
+# dodanie postgis'a
+sudo apt install postgis postgresql-15-postgis-3
+# i w psql:
+create extension postgis...
+
+#docker: https://docs.docker.com/engine/install/ubuntu/
+
+# trzeba jakoś przesłać sobie plik backup bazy i plik tworzący raster dem (ten .sql co generowaliśmy wcześniej)
+pg_dump -h localhost -U postgres -d cw6 < baza.backup # tu może coś pominąłem
+#potem wejść do psql
+\c cw6
+create schema rasters;
+exit
+psql -h localhost -U postgres -d cw6 -a -f plik_z_kodem.sql
+# to wszystko powinno utworzyć ten raster w bazie
+
+#instrukcja pdf...
+chmod 777 map
+
+# ip do tego trzeba zabrać z komendy "ip a". Do tego i do pliku konfiguracyjnego.
+psql postgresql://postgres:hasło@172.17.0.1/cw6
