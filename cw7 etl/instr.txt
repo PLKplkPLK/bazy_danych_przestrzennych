@@ -1,0 +1,29 @@
+1. Pobranie danych
+
+
+2. Reader, ustawienia: TIFF, select multiple files/folders i zaznaczyć wszystkie pliki rastrowe z folderu data.
+
+2a. Reprojector, destination coordinate system: LL-WGS84
+RasterPropertyExtractor (do odczytania extent, czyli x_min, y_min, x_max, y_max)
+
+2b. AttributeCreator, aby stworzyć ścieżki do plików z rastrami.
+FilePropertyExtractor, w File Path wybrać Attribute Value > path (wcześniej stworzona w AttributeCreator).
+
+2c. Znów AttributeCreator (obrazek z2c).
+
+2d. Writer ESRI GeoDatabase - obrazki z2d*. Folder Results.gdb
+
+
+3. Pobranie danych i wczytanie readerem:
+./Data/GB/scotland_and_wales_region.shp
+
+3a. Tester + połączenie poligonów czyli Aggregator.
+
+3b i c. Wczytanie podobnie jak w przypadku zad. 2. Rastry przycinamy do południowej Walii używając Clipper.
+
+3d. W psql: create database cw9;
+Później create extension postgis i postgis_raster;
+RasterPaletteResolver i output z niego do Writer'a - obrazki z3d*.
+
+
+4. Plik kod.sql
